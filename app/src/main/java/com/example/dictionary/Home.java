@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -35,9 +36,9 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     private RecyclerView recyclerView;
     private GreenAdapter greenAdapter;
     private TextView searchHeading;
-    private ProgressBar mLoadingIndicator;
+    private SwipeRefreshLayout mySwipeRefreshLayout;
 
-    String tag=Home.class.getSimpleName();
+    String TAG=Home.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +49,20 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         searchHeading = (TextView) findViewById(R.id.searchHeading);
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         recyclerView = findViewById(R.id.recyclerView);
+        mySwipeRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipeRefresh);
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.d(TAG, "onRefresh called from SwipeRefreshLayout");
+
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        displayRandomWords();
+                    }
+                }
+        );
         if(getSupportLoaderManager().getLoader(LoaderId)==null)
             displayRandomWords();
         else
@@ -59,10 +72,9 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
 
     public void displayRandomWords(){
 
-        mLoadingIndicator.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.INVISIBLE);
+        mySwipeRefreshLayout.setRefreshing(true);
         randomQuery=randomizer();
-        Log.d(tag,randomQuery);
+        Log.d(TAG,randomQuery);
         String url = NetworkUtils.getDataMuseUrl(randomQuery);
         Bundle bundle=new Bundle();
         bundle.putString(BundleQuery,url);
@@ -130,8 +142,6 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String s) {
 
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        recyclerView.setVisibility(View.VISIBLE);
         if (TextUtils.isEmpty(s))
             searchHeading.setText("Network Error");
         else {
@@ -151,6 +161,8 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
 
             }
         }
+        mySwipeRefreshLayout.setRefreshing(false);
+        
     }
 
     @Override
