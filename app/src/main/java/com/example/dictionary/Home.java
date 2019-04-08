@@ -2,6 +2,7 @@ package com.example.dictionary;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -18,8 +19,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -55,10 +54,6 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        Log.d(TAG, "onRefresh called from SwipeRefreshLayout");
-
-                        // This method performs the actual data-refresh operation.
-                        // The method calls setRefreshing(false) when it's finished.
                         displayRandomWords();
                     }
                 }
@@ -95,7 +90,8 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //onSearchRequested();
+        Intent intent=new Intent(Home.this,SavedWords.class);
+        startActivity(intent);
         return true;
     }
 
@@ -162,7 +158,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
             }
         }
         mySwipeRefreshLayout.setRefreshing(false);
-        
+
     }
 
     @Override
@@ -172,7 +168,10 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
 
     @Override
     public void onCLickButton(int id) {
-
+        String word=greenAdapter.getItem(id);
+        Intent intent=new Intent(Home.this,Details.class);
+        intent.putExtra(Intent.EXTRA_TEXT,word);
+        startActivity(intent);
     }
 
     public String randomizer(){

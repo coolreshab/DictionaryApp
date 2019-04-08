@@ -34,6 +34,10 @@ public class GreenAdapter extends RecyclerView.Adapter<GreenAdapter.WordHolder> 
         return words.size();
     }
 
+    public String getItem(int idx){
+        return words.get(idx);
+    }
+
     public class WordHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView wordTextView;
