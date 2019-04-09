@@ -26,14 +26,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
 
-public class Home extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, GreenAdapter.ButtonListener {
+public class Home extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, GreenAdapterHome.ButtonListener {
 
     private SearchView searchView;
     private static String BundleQuery="search";
     private static String randomQuery;
     private static int LoaderId=97;
     private RecyclerView recyclerView;
-    private GreenAdapter greenAdapter;
+    private GreenAdapterHome greenAdapter;
     private TextView searchHeading;
     private SwipeRefreshLayout mySwipeRefreshLayout;
 
@@ -142,7 +142,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
             searchHeading.setText("Network Error");
         else {
 
-            greenAdapter = new GreenAdapter(JsonParser.dataMuseParser(s), this);
+            greenAdapter = new GreenAdapterHome(JsonParser.dataMuseParser(s), this);
             if (greenAdapter.getItemCount() == 0) {
                 searchHeading.setText("Oops nothing to show");
             }
