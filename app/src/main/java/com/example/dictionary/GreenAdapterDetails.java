@@ -27,18 +27,28 @@ public class GreenAdapterDetails extends RecyclerView.Adapter<GreenAdapterDetail
     @Override
     public void onBindViewHolder(@NonNull MeanHolder meanHolder, int id) {
         GoogleFetchInfo obj=meaning.get(id);
-        if(!TextUtils.isEmpty(obj.partOfSpeech))
-            meanHolder.mean1.setText(GoogleFetchInfoFull.convertFirstToUpper(obj.partOfSpeech));
-        if(!TextUtils.isEmpty(obj.definition))
-            meanHolder.mean2.setText("Definition: "+obj.definition);
-        if(!TextUtils.isEmpty(obj.example))
-            meanHolder.mean3.setText("Example: "+obj.example);
+        if(!TextUtils.isEmpty(obj.partOfSpeech)){
+            meanHolder.mean1.setVisibility(View.VISIBLE);
+            meanHolder.mean1.setText(GoogleFetchInfoFull.addEffect(GoogleFetchInfoFull.convertFirstToUpper(obj.partOfSpeech),"<i><u>","</i></u>"));
+        }
+        if(!TextUtils.isEmpty(obj.definition)) {
+            meanHolder.mean2.setVisibility(View.VISIBLE);
+            meanHolder.mean2.setText(GoogleFetchInfoFull.addEffect("Definition:","<b>","</b>"));
+            meanHolder.mean2.append("  "+obj.definition);
+        }
+        if(!TextUtils.isEmpty(obj.example)) {
+            meanHolder.mean3.setVisibility(View.VISIBLE);
+            meanHolder.mean3.setText(GoogleFetchInfoFull.addEffect("Example:","<b>","</b>"));
+            meanHolder.mean3.append("  "+obj.example);
+        }
         if(!obj.synonyms.isEmpty()){
-            meanHolder.mean4.setText("Synonyms: ");
+            meanHolder.mean4.setVisibility(View.VISIBLE);
+            meanHolder.mean4.setText(GoogleFetchInfoFull.addEffect("Synonyms:","<b>","</b>"));
+            meanHolder.mean4.append("  ");
             for(int i=0;i<obj.synonyms.size();++i){
                 meanHolder.mean4.append(obj.synonyms.get(i));
                 if(i!=obj.synonyms.size()-1)
-                    meanHolder.mean4.append(",");
+                    meanHolder.mean4.append(" , ");
             }
         }
     }

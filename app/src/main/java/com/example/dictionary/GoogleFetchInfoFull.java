@@ -1,5 +1,8 @@
 package com.example.dictionary;
 
+import android.text.Html;
+import android.text.Spanned;
+
 import java.util.ArrayList;
 
 public class GoogleFetchInfoFull {
@@ -17,5 +20,9 @@ public class GoogleFetchInfoFull {
     }
     public static String convertFirstToUpper(String query){
         return Character.toUpperCase(query.charAt(0))+query.substring(1);
+    }
+    public static Spanned addEffect(String query,String L,String R){
+        String sourceString = L + query + R;
+        return Html.fromHtml(sourceString);
     }
 }

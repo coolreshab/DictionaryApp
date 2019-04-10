@@ -2,6 +2,8 @@ package com.example.dictionary;
 
 import android.app.SearchManager;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -40,6 +42,7 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
     private static String query;
     private ProgressBar progressBar;
     private LinearLayout linearLayout;
+    private GoogleFetchInfoFull results;
 
 
     @Override
@@ -64,8 +67,8 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
         pronunciation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //incomplete :(
-                Toast.makeText(Details.this,"Pronunciation",Toast.LENGTH_LONG).show();
+                //Toast.makeText(Details.this,"Pronunciation",Toast.LENGTH_LONG).show();
+                playPronunciation();
             }
         });
         if(getSupportLoaderManager().getLoader(LoaderId)==null)
@@ -136,7 +139,7 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
             wordName.setText("Oops Something Went Wrong");
         else {
 
-            GoogleFetchInfoFull results=JsonParser.googleDictionaryJsonParser(s);
+            results=JsonParser.googleDictionaryJsonParser(s);
             if(results==null){
                 wordName.setText("Oops Something Went Wrong");
             }
@@ -157,6 +160,33 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
         }
     }
 
+    void playPronunciation(){
+        pronunciation.setEnabled(false);
+        String audioUrl = results.pronunciation;
+        MediaPlayer mPlayer = new MediaPlayer();
+        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try{
+            mPlayer.setDataSource(audioUrl);
+            mPlayer.prepareAsync();
+        }catch (IOException e){
+            e.printStackTrace();
+        }catch (IllegalArgumentException e){
+            e.printStackTrace();
+        }catch (SecurityException e){
+            e.printStackTrace();
+        }catch (IllegalStateException e){
+            e.printStackTrace();
+        }
+        mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+
+            @Override
+            public void onPrepared(MediaPlayer player) {
+                player.start();
+            }
+
+        });
+        pronunciation.setEnabled(true);
+    }
     @Override
     public void onLoaderReset(@NonNull Loader<String> loader) {
 
