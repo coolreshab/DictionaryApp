@@ -34,7 +34,6 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
     private TextView wordName;
     private ImageButton pronunciation;
     private ToggleButton favourite;
-    private static String BundleQuery="search";
     private TextView phonetic;
     private static int LoaderId=97;
     private RecyclerView recyclerView;
@@ -67,29 +66,11 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
         pronunciation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(Details.this,"Pronunciation",Toast.LENGTH_LONG).show();
                 playPronunciation();
             }
         });
-        if(getSupportLoaderManager().getLoader(LoaderId)==null)
-            doMySearch(query);
-        else
-            getSupportLoaderManager().initLoader(LoaderId, null, this);
+        getSupportLoaderManager().initLoader(LoaderId, null, this);
     }
-    private void doMySearch(String query){
-        //Log.d(TAG,"INSIDE DO MY SEARCH "+query);
-        String url = NetworkUtils.getGoogleDictionaryUrl(query);
-        Bundle bundle=new Bundle();
-        bundle.putString(BundleQuery,url);
-        LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<String> loader = loaderManager.getLoader(LoaderId);
-        if (loader == null) {
-            loaderManager.initLoader(LoaderId, bundle, this);
-        } else {
-            loaderManager.restartLoader(LoaderId, bundle,this);
-        }
-    }
-
     @NonNull
     @Override
     public Loader<String> onCreateLoader(int id, @Nullable final Bundle bundle) {
@@ -100,8 +81,7 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
 
             @Override
             protected void onStartLoading() {
-                if(bundle==null)
-                    return;
+                super.onStartLoading();
                 if(googleJson!=null){
                     deliverResult(googleJson);
                 }
@@ -112,7 +92,7 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
             @Nullable
             @Override
             public String loadInBackground() {
-                String url=bundle.getString(BundleQuery);
+                String url = NetworkUtils.getGoogleDictionaryUrl(query);
                 try {
                     String response=NetworkUtils.getResponse(new URL(url));
                     return response;
@@ -124,8 +104,8 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
 
             @Override
             public void deliverResult(@Nullable String data) {
-                googleJson=data;
                 super.deliverResult(data);
+                googleJson=data;
             }
         };
     }

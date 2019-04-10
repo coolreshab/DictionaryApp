@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,14 +31,12 @@ import java.util.Random;
 public class Home extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, GreenAdapterHome.ButtonListener {
 
     private SearchView searchView;
-    private static String BundleQuery="search";
     private static String randomQuery;
     private static int LoaderId=97;
     private RecyclerView recyclerView;
-    private GreenAdapterHome greenAdapter;
+    private GreenAdapterHome greenAdapter=null;
     private TextView searchHeading;
     private SwipeRefreshLayout mySwipeRefreshLayout;
-    private boolean flagSwipeListener;
 
     String TAG=Home.class.getSimpleName();
 
@@ -45,7 +44,6 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        flagSwipeListener=false;
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) findViewById(R.id.search);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -57,33 +55,14 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        flagSwipeListener=true;displayRandomWords();
+                        getSupportLoaderManager().restartLoader(LoaderId, null,Home.this);
                     }
                 }
         );
-        if(getSupportLoaderManager().getLoader(LoaderId)==null)
-            displayRandomWords();
-        else
-            getSupportLoaderManager().initLoader(LoaderId, null, this);
+        getSupportLoaderManager().initLoader(LoaderId, null, this);
         //handle configuration changes
     }
 
-    public void displayRandomWords(){
-
-        mySwipeRefreshLayout.setRefreshing(true);
-        randomQuery=randomizer();
-        Log.d(TAG,randomQuery);
-        String url = NetworkUtils.getDataMuseUrl(randomQuery);
-        Bundle bundle=new Bundle();
-        bundle.putString(BundleQuery,url);
-        LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<String> loader = loaderManager.getLoader(LoaderId);
-        if (loader == null) {
-            loaderManager.initLoader(LoaderId, bundle, this);
-        } else {
-            loaderManager.restartLoader(LoaderId, bundle,this);
-        }
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -108,8 +87,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
 
             @Override
             protected void onStartLoading() {
-                if(bundle==null)
-                    return;
+                super.onStartLoading();
                 if(datamuseJson!=null){
                     deliverResult(datamuseJson);
                 }
@@ -120,7 +98,9 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
             @Nullable
             @Override
             public String loadInBackground() {
-                String url=bundle.getString(BundleQuery);
+                mySwipeRefreshLayout.setRefreshing(true);
+                randomQuery=randomizer();
+                String url = NetworkUtils.getDataMuseUrl(randomQuery);
                 try {
                     String response=NetworkUtils.getResponse(new URL(url));
                     return response;
@@ -132,8 +112,8 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
 
             @Override
             public void deliverResult(@Nullable String data) {
-                datamuseJson=data;
                 super.deliverResult(data);
+                datamuseJson=data;
             }
         };
     }
@@ -142,15 +122,15 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     public void onLoadFinished(@NonNull Loader<String> loader, String s) {
 
         if (TextUtils.isEmpty(s))
-            searchHeading.setText("Network Error");
+            Toast.makeText(Home.this,"Network Error",Toast.LENGTH_SHORT).show();
         else {
 
             ArrayList<String>data=JsonParser.dataMuseParser(s);
             if (data.isEmpty()) {
-                searchHeading.setText("Oops nothing to show");
+                Toast.makeText(Home.this,"Oops nothing to show",Toast.LENGTH_SHORT).show();
             }
             else {
-                if (!flagSwipeListener) {
+                if (greenAdapter==null) {
                     greenAdapter = new GreenAdapterHome(data, this);
                     recyclerView.setAdapter(greenAdapter);
                     recyclerView.setHasFixedSize(true);
