@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Home extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, GreenAdapterHome.ButtonListener {
@@ -36,6 +37,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     private GreenAdapterHome greenAdapter;
     private TextView searchHeading;
     private SwipeRefreshLayout mySwipeRefreshLayout;
+    private boolean flagSwipeListener;
 
     String TAG=Home.class.getSimpleName();
 
@@ -43,6 +45,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        flagSwipeListener=false;
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) findViewById(R.id.search);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -54,7 +57,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        displayRandomWords();
+                        flagSwipeListener=true;displayRandomWords();
                     }
                 }
         );
@@ -142,23 +145,25 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
             searchHeading.setText("Network Error");
         else {
 
-            greenAdapter = new GreenAdapterHome(JsonParser.dataMuseParser(s), this);
-            if (greenAdapter.getItemCount() == 0) {
+            ArrayList<String>data=JsonParser.dataMuseParser(s);
+            if (data.isEmpty()) {
                 searchHeading.setText("Oops nothing to show");
             }
             else {
-                searchHeading.setText("Random words matching "+randomQuery);
-                recyclerView.setAdapter(greenAdapter);
-                recyclerView.setHasFixedSize(true);
-                DividerItemDecoration itemDecor = new DividerItemDecoration(this, 1);
-                recyclerView.addItemDecoration(itemDecor);
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-                recyclerView.setLayoutManager(layoutManager);
-
+                if (!flagSwipeListener) {
+                    greenAdapter = new GreenAdapterHome(data, this);
+                    recyclerView.setAdapter(greenAdapter);
+                    recyclerView.setHasFixedSize(true);
+                    DividerItemDecoration itemDecor = new DividerItemDecoration(this, 1);
+                    recyclerView.addItemDecoration(itemDecor);
+                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+                    recyclerView.setLayoutManager(layoutManager);
+                } else {
+                    greenAdapter.setWords(data);
+                }
             }
         }
         mySwipeRefreshLayout.setRefreshing(false);
-
     }
 
     @Override
@@ -181,7 +186,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
         int option=rand.nextInt(4);
         if(option==0){
 
-            int lenPrefix=rand.nextInt(3)+1;
+            int lenPrefix=1;
             while(lenPrefix>0){
                 randomString+=(char) ('a'+rand.nextInt(26));
                 lenPrefix--;
@@ -191,7 +196,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
         else if(option==1){
 
             randomString+="*";
-            int lenSuffix=rand.nextInt(3)+1;
+            int lenSuffix=1;
             while(lenSuffix>0){
                 randomString+=(char) ('a'+rand.nextInt(26));
                 lenSuffix--;
@@ -199,18 +204,15 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
         }
         else if(option==2){
 
-            int len=rand.nextInt(4)+3;
+            int len=rand.nextInt(8)+3;
             while(len>0){
-                if(len%3==0)
-                    randomString+=(char) ('a'+rand.nextInt(26));
-                else
-                    randomString+="?";
+                randomString+="?";
                 len--;
             }
         }
         else{
 
-            int lenSubsequence=rand.nextInt(3)+1;
+            int lenSubsequence=rand.nextInt(2)+1;
             while(lenSubsequence>0){
                 randomString+="*";
                 randomString+=(char) ('a'+rand.nextInt(26));

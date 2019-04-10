@@ -17,6 +17,10 @@ public class GreenAdapterHome extends RecyclerView.Adapter<GreenAdapterHome.Word
         this.words=words;
         this.bListener=bListener;
     }
+    public void setWords(ArrayList<String>words){
+        this.words=words;
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public WordHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int id) {

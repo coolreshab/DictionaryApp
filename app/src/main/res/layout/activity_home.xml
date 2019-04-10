@@ -13,22 +13,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/search"
+
         />
 
     <TextView
-        android:layout_marginRight="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginLeft="15dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
         android:id="@+id/searchHeading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20sp"/>
+        android:text="Random Words"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        />
+    <View style="@style/Divider.Horizontal"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/swipeRefresh"
-        android:layout_margin="20dp">
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        >
 
         <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
