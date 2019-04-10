@@ -26,7 +26,7 @@ public class GreenAdapterHome extends RecyclerView.Adapter<GreenAdapterHome.Word
 
     @Override
     public void onBindViewHolder(@NonNull WordHolder wordHolder, int id) {
-        wordHolder.wordTextView.setText(words.get(id));
+        wordHolder.wordTextView.setText(GoogleFetchInfoFull.convertFirstToUpper(words.get(id)));
     }
 
     @Override

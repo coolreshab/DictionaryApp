@@ -145,7 +145,8 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
             }
             else{
                 wordName.setText(GoogleFetchInfoFull.convertFirstToUpper(query));
-                pronunciation.setVisibility(View.VISIBLE);
+                if(!TextUtils.isEmpty(results.pronunciation))
+                    pronunciation.setVisibility(View.VISIBLE);
                 favourite.setVisibility(View.VISIBLE);
                 if(!TextUtils.isEmpty(results.phonetic))
                     phonetic.setText("Phonetic: "+results.phonetic);
