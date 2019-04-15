@@ -1,5 +1,7 @@
 package com.example.dictionary;
 
+import android.text.TextUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +14,8 @@ public class JsonParser {
     public  static ArrayList<String>dataMuseParser(String dataMuseJson) {
 
         ArrayList<String>dataMuseResults=new ArrayList<String>();
+        if(TextUtils.isEmpty(dataMuseJson))
+            return  dataMuseResults;
         try {
             JSONArray dataMuseArray=new JSONArray(dataMuseJson);
             for(int i=0;i<dataMuseArray.length();++i){
@@ -61,7 +65,8 @@ public class JsonParser {
                                 obj.synonyms.add(temp1.getString(j));
                             }
                         }
-                        googleResults.meaning.add(obj);
+                        if(!TextUtils.isEmpty(obj.definition))
+                            googleResults.meaning.add(obj);
                     }
                 }
 

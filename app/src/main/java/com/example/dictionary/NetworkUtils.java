@@ -12,14 +12,14 @@ import java.net.URL;
 
 public class NetworkUtils {
 
-    public static String getDataMuseUrl(String query){
+    public static String getDataMuseUrl(String query,String type,String param,String max){
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
                 .authority("api.datamuse.com")
-                .appendPath("words")
-                .appendQueryParameter("sp",query)
-                .appendQueryParameter("max","1000");
+                .appendPath(type)
+                .appendQueryParameter(param,query)
+                .appendQueryParameter("max",max);
         String dataMuseUrl = builder.build().toString();
         return  dataMuseUrl;
     }

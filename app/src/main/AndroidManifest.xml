@@ -35,6 +35,8 @@
                 android:name="android.app.default_searchable"
                 android:value=".Details" />
         </activity>
+        <provider android:name=".SearchSuggestionsProvider"
+            android:authorities="com.example.dictionary.SearchSuggestionsProvider"/>
     </application>
 
 </manifest>

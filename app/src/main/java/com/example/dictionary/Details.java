@@ -24,8 +24,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 public class Details extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>{
@@ -59,10 +62,21 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             query = intent.getStringExtra(SearchManager.QUERY);
         }
+        else if(Intent.ACTION_VIEW.equals(intent.getAction())){
+            query=intent.getDataString();
+        }
         else{
             query=intent.getStringExtra(Intent.EXTRA_TEXT);
         }
         query=query.trim();
+        String[] splited = query.split("\\s+");
+        query="";
+        for(int  i=0;i<splited.length;++i){
+            query+=splited[i];
+            if(i!=splited.length-1)
+                query+="-";
+        }
+        Log.d(TAG,query);
         pronunciation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,7 +110,19 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
                 try {
                     String response=NetworkUtils.getResponse(new URL(url));
                     return response;
-                } catch (IOException e) {
+                }
+                catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    return "1";
+                }
+                catch(UnknownHostException e){
+                    e.printStackTrace();
+                    return "2";
+                }
+                catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
                 return null;
@@ -115,16 +141,18 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
 
         progressBar.setVisibility(View.INVISIBLE);
         linearLayout.setVisibility(View.VISIBLE);
-        if (TextUtils.isEmpty(s))
-            wordName.setText("Oops Something Went Wrong");
+        if(s.equals("2"))
+            wordName.setText("Network Error");
+        else if (s.equals("1"))
+            wordName.setText("Word not found");
         else {
 
             results=JsonParser.googleDictionaryJsonParser(s);
-            if(results==null){
-                wordName.setText("Oops Something Went Wrong");
+            if(results==null || results.meaning.isEmpty()){
+                wordName.setText("Word not found");
             }
             else{
-                wordName.setText(GoogleFetchInfoFull.convertFirstToUpper(query));
+                wordName.setText(GoogleFetchInfoFull.convertFirstToUpper(results.wordName));
                 if(!TextUtils.isEmpty(results.pronunciation))
                     pronunciation.setVisibility(View.VISIBLE);
                 favourite.setVisibility(View.VISIBLE);
