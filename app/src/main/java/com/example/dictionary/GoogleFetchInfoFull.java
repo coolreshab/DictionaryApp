@@ -25,4 +25,14 @@ public class GoogleFetchInfoFull {
         String sourceString = L + query + R;
         return Html.fromHtml(sourceString);
     }
+    public static String convert(String query){
+        String[] splited = query.split("\\s+");
+        query="";
+        for(int  i=0;i<splited.length;++i){
+            query+=splited[i].toLowerCase();
+            if(i!=splited.length-1)
+                query+="-";
+        }
+        return query;
+    }
 }

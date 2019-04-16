@@ -21,15 +21,18 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import com.example.dictionary.database.WordsDb;
+import com.example.dictionary.database.WordsEntity;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class Details extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>{
 
@@ -45,6 +48,7 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
     private ProgressBar progressBar;
     private LinearLayout linearLayout;
     private GoogleFetchInfoFull results;
+    private WordsDb wordsDb;
 
 
     @Override
@@ -69,13 +73,7 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
             query=intent.getStringExtra(Intent.EXTRA_TEXT);
         }
         query=query.trim();
-        String[] splited = query.split("\\s+");
-        query="";
-        for(int  i=0;i<splited.length;++i){
-            query+=splited[i];
-            if(i!=splited.length-1)
-                query+="-";
-        }
+        query=GoogleFetchInfoFull.convert(query);
         Log.d(TAG,query);
         pronunciation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +81,42 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
                 playPronunciation();
             }
         });
-        getSupportLoaderManager().initLoader(LoaderId, null, this);
+        favourite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        WordsEntity savedResult=wordsDb.wordsDao().loadWordByName(GoogleFetchInfoFull.convert(results.wordName));
+                        savedResult.setIsStarred(!savedResult.getIsStarred());
+                        wordsDb.wordsDao().updateWords(savedResult);
+                    }
+                });
+            }
+        });
+        wordsDb=WordsDb.getInstance(getApplicationContext());
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final WordsEntity savedResult=wordsDb.wordsDao().loadWordByName(query);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(savedResult!=null){
+                            progressBar.setVisibility(View.INVISIBLE);
+                            linearLayout.setVisibility(View.VISIBLE);
+                            displayDetails(results=JsonParser.googleDictionaryJsonParser(savedResult.getWordDetails()));
+                            if(savedResult.getIsStarred()){
+                                favourite.setChecked(true);
+                                //set the toggled state
+                            }
+                        }
+                        else
+                            getSupportLoaderManager().initLoader(LoaderId, null, Details.this);
+                    }
+                });
+            }
+        });;
     }
     @NonNull
     @Override
@@ -137,39 +170,56 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String s) {
-
+    public void onLoadFinished(@NonNull Loader<String> loader, final String s) {
         progressBar.setVisibility(View.INVISIBLE);
         linearLayout.setVisibility(View.VISIBLE);
         if(s.equals("2"))
             wordName.setText("Network Error");
         else if (s.equals("1"))
             wordName.setText("Word not found");
-        else {
-
+        else{
             results=JsonParser.googleDictionaryJsonParser(s);
-            if(results==null || results.meaning.isEmpty()){
-                wordName.setText("Word not found");
-            }
-            else{
-                wordName.setText(GoogleFetchInfoFull.convertFirstToUpper(results.wordName));
-                if(!TextUtils.isEmpty(results.pronunciation))
-                    pronunciation.setVisibility(View.VISIBLE);
-                favourite.setVisibility(View.VISIBLE);
-                if(!TextUtils.isEmpty(results.phonetic))
-                    phonetic.setText("Phonetic: "+results.phonetic);
-                greenAdapter = new GreenAdapterDetails(results.meaning);
-                recyclerView.setAdapter(greenAdapter);
-                recyclerView.setHasFixedSize(true);
-                DividerItemDecoration itemDecor = new DividerItemDecoration(this, 1);
-                recyclerView.addItemDecoration(itemDecor);
-                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-                recyclerView.setLayoutManager(layoutManager);
-            }
+            displayDetails(results);
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    saveDetails(results.wordName,s);
+                }
+            });
+        }
+    }
+    private void saveDetails(String wordName,String s){
+        //add s in to database
+        wordName=GoogleFetchInfoFull.convert(wordName);
+        WordsEntity obj=new WordsEntity(wordName,s,false,new Date());
+        if(wordsDb.wordsDao().loadWordByName(wordName)==null)
+            wordsDb.wordsDao().insertWords(obj);
+    }
+
+    private void displayDetails(GoogleFetchInfoFull results) {
+        if(results==null || results.meaning.isEmpty()){
+            wordName.setText("Word not found");
+        }
+        else{
+
+            wordName.setText(GoogleFetchInfoFull.convertFirstToUpper(results.wordName));
+            if(!TextUtils.isEmpty(results.pronunciation))
+                pronunciation.setVisibility(View.VISIBLE);
+            favourite.setVisibility(View.VISIBLE);
+            if(!TextUtils.isEmpty(results.phonetic))
+                phonetic.setText("Phonetic: "+results.phonetic);
+            greenAdapter = new GreenAdapterDetails(results.meaning);
+            recyclerView.setAdapter(greenAdapter);
+            recyclerView.setHasFixedSize(true);
+            DividerItemDecoration itemDecor = new DividerItemDecoration(this, 1);
+            recyclerView.addItemDecoration(itemDecor);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+            recyclerView.setLayoutManager(layoutManager);
         }
     }
 
-    void playPronunciation(){
+    private void playPronunciation(){
+        //optimize it by caching it :D
         pronunciation.setEnabled(false);
         String audioUrl = results.pronunciation;
         MediaPlayer mPlayer = new MediaPlayer();
@@ -194,13 +244,12 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
             }
 
         });
+        //have a lag here
         pronunciation.setEnabled(true);
     }
     @Override
     public void onLoaderReset(@NonNull Loader<String> loader) {
 
     }
-
-
 }
 

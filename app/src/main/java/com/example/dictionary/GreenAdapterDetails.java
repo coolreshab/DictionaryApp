@@ -12,7 +12,6 @@ import java.util.ArrayList;
 
 public class GreenAdapterDetails extends RecyclerView.Adapter<GreenAdapterDetails.MeanHolder> {
 
-    //incomplete :(
     private ArrayList<GoogleFetchInfo>meaning;
     public GreenAdapterDetails(ArrayList<GoogleFetchInfo>meaning){
         this.meaning=meaning;

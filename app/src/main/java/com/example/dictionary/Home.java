@@ -19,7 +19,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,8 +34,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     private static String randomQuery;
     private static int LoaderId=97;
     private RecyclerView recyclerView;
-    private GreenAdapterHome greenAdapter=null;
-    private TextView searchHeading;
+    private GreenAdapterHome greenAdapter;
     private SwipeRefreshLayout mySwipeRefreshLayout;
 
     String TAG=Home.class.getSimpleName();
@@ -50,8 +48,6 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         searchView.setQueryRefinementEnabled(true);
-
-        searchHeading = (TextView) findViewById(R.id.searchHeading);
         recyclerView = findViewById(R.id.recyclerView);
         mySwipeRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipeRefresh);
         mySwipeRefreshLayout.setOnRefreshListener(
@@ -91,6 +87,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
             @Override
             protected void onStartLoading() {
                 super.onStartLoading();
+                mySwipeRefreshLayout.setRefreshing(true);
                 if(datamuseJson!=null){
                     deliverResult(datamuseJson);
                 }
@@ -101,12 +98,6 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
             @Nullable
             @Override
             public String loadInBackground() {
-                runOnUiThread(new Runnable() {
-                                  @Override
-                                  public void run() {
-                                      mySwipeRefreshLayout.setRefreshing(true);
-                                  }
-                              });
                 randomQuery=randomizer();
                 String url = NetworkUtils.getDataMuseUrl(randomQuery,"words","sp","1000");
                 try {

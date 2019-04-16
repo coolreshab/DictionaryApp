@@ -14,8 +14,6 @@ public class JsonParser {
     public  static ArrayList<String>dataMuseParser(String dataMuseJson) {
 
         ArrayList<String>dataMuseResults=new ArrayList<String>();
-        if(TextUtils.isEmpty(dataMuseJson))
-            return  dataMuseResults;
         try {
             JSONArray dataMuseArray=new JSONArray(dataMuseJson);
             for(int i=0;i<dataMuseArray.length();++i){
@@ -25,7 +23,6 @@ public class JsonParser {
                     if(word.length()<=20)
                         dataMuseResults.add(word);
                 }
-
             }
         } catch (JSONException e) {
             e.printStackTrace();
