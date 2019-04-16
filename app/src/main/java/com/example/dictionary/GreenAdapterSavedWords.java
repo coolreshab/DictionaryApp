@@ -25,7 +25,12 @@ class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords
         this.words=words;
         notifyDataSetChanged();
     }
-
+    public  WordsEntity getItem(int id){
+        return words.get(id);
+    }
+    public  String getItemWord(int id){
+        return GoogleFetchInfoFull.undoConvert(words.get(id).getWordName());
+    }
     @Override
     public WordHolder onCreateViewHolder(ViewGroup viewGroup, int id) {
         View v= LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.saved_word_view,viewGroup,false);
@@ -35,7 +40,7 @@ class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords
     @Override
     public void onBindViewHolder(WordHolder wordHolder, int id) {
         WordsEntity obj=words.get(id);
-        wordHolder.wordName.setText(GoogleFetchInfoFull.convertFirstToUpper(obj.getWordName()));
+        wordHolder.wordName.setText(GoogleFetchInfoFull.undoConvert(obj.getWordName()));
         wordHolder.isStarred.setVisibility(View.VISIBLE);
         wordHolder.isStarred.setChecked(obj.getIsStarred());
     }
@@ -45,7 +50,7 @@ class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords
         return words.size();
     }
 
-    class WordHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class WordHolder extends RecyclerView.ViewHolder{
 
         private TextView wordName;
         private ToggleButton isStarred;
@@ -54,16 +59,24 @@ class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords
             super(itemView);
             wordName=(TextView)itemView.findViewById(R.id.savedWordsTextView);
             isStarred=(ToggleButton)itemView.findViewById(R.id.savedWordsFavourite);
-            itemView.setOnClickListener(this);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    bListener.onClickButton(getAdapterPosition());
+                }
+            });
+            isStarred.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    bListener.onClickFavourite(getAdapterPosition());
+                }
+            });
         }
 
-        @Override
-        public void onClick(View v) {
-            int pos=getAdapterPosition();
-            bListener.onCLickButton(pos);
-        }
     }
     public interface ButtonListener{
-        void onCLickButton(int id);
+        void onClickButton(int id);
+        void onClickFavourite(int id);
     }
 }

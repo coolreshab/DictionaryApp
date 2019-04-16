@@ -35,4 +35,15 @@ public class GoogleFetchInfoFull {
         }
         return query;
     }
+    public static String undoConvert(String query){
+        String[] splited = query.split("-");
+        query="";
+        splited[0]=convertFirstToUpper(splited[0]);
+        for(int  i=0;i<splited.length;++i){
+            query+=splited[i];
+            if(i!=splited.length-1)
+                query+=" ";
+        }
+        return query;
+    }
 }
