@@ -1,35 +1,48 @@
 package com.example.dictionary;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.example.dictionary.database.WordsEntity;
+
+import java.util.ArrayList;
 import java.util.List;
 
-class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords.WordHolder> {
+class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords.WordHolder> implements Filterable {
 
 
-    private List<WordsEntity> words;
+    private List<WordsEntity>words;
+    private List<WordsEntity>filteredWords;
     private ButtonListener bListener;
+    private String TAG=GreenAdapterSavedWords.class.getSimpleName();
 
     public GreenAdapterSavedWords(List<WordsEntity> words, ButtonListener bListener) {
         this.words = words;
+        this.filteredWords=words;
         this.bListener = bListener;
     }
-
     public void setWords(List<WordsEntity>words){
         this.words=words;
+        this.filteredWords=words;
+        notifyDataSetChanged();
+    }
+    public void deleteWord(WordsEntity obj){
+        words.remove(obj);
+        filteredWords.remove(obj);
         notifyDataSetChanged();
     }
     public  WordsEntity getItem(int id){
-        return words.get(id);
+        return filteredWords.get(id);
     }
     public  String getItemWord(int id){
-        return GoogleFetchInfoFull.undoConvert(words.get(id).getWordName());
+        return GoogleFetchInfoFull.undoConvert(filteredWords.get(id).getWordName());
     }
     @Override
     public WordHolder onCreateViewHolder(ViewGroup viewGroup, int id) {
@@ -39,7 +52,7 @@ class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords
 
     @Override
     public void onBindViewHolder(WordHolder wordHolder, int id) {
-        WordsEntity obj=words.get(id);
+        WordsEntity obj=filteredWords.get(id);
         wordHolder.wordName.setText(GoogleFetchInfoFull.undoConvert(obj.getWordName()));
         wordHolder.isStarred.setVisibility(View.VISIBLE);
         wordHolder.isStarred.setChecked(obj.getIsStarred());
@@ -47,7 +60,44 @@ class GreenAdapterSavedWords extends RecyclerView.Adapter<GreenAdapterSavedWords
 
     @Override
     public int getItemCount() {
-        return words.size();
+        return filteredWords.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                //Log.d(TAG,charString);
+                if (charString.isEmpty()) {
+                    filteredWords = words;
+                } else {
+                    List<WordsEntity> filteredList = new ArrayList<>();
+                    for (WordsEntity row : words) {
+
+                        // name match condition. this might differ depending on your requirement
+                        // here we are looking for name or phone number match
+                        if (row.getWordName().toLowerCase().contains(charString.toLowerCase())){
+                            filteredList.add(row);
+                        }
+                    }
+
+                    filteredWords = filteredList;
+                    //Log.d(TAG,Integer.toString(filteredWords.size()));
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredWords;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                filteredWords = (ArrayList<WordsEntity>) filterResults.values;
+                // refresh the list with filtered data
+                notifyDataSetChanged();
+            }
+        };
     }
 
     class WordHolder extends RecyclerView.ViewHolder{

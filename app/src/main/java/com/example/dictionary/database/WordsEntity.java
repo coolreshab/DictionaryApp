@@ -15,13 +15,15 @@ public class WordsEntity {
     private String wordName;
     private String wordDetails;
     private boolean isStarred;
+    private String pronunciationUrl;
     private Date ticks;
 
-    public WordsEntity(String wordName, String wordDetails, boolean isStarred, Date ticks) {
+    public WordsEntity(String wordName, String wordDetails, boolean isStarred, Date ticks,String pronunciationUrl) {
         this.wordName = wordName;
         this.wordDetails = wordDetails;
         this.isStarred = isStarred;
         this.ticks = ticks;
+        this.pronunciationUrl=pronunciationUrl;
     }
 
     public String getWordName() {
@@ -55,5 +57,14 @@ public class WordsEntity {
     public void setTicks(Date ticks) {
         this.ticks = ticks;
     }
+
+    public String getPronunciationUrl() {
+        return pronunciationUrl;
+    }
+
+    public void setPronunciationUrl(String pronunciationUrl) {
+        this.pronunciationUrl = pronunciationUrl;
+    }
+
 
 }

@@ -3,6 +3,7 @@ package com.example.dictionary;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -38,6 +39,7 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     private SwipeRefreshLayout mySwipeRefreshLayout;
 
     String TAG=Home.class.getSimpleName();
+    private SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +51,16 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
         searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
         searchView.setQueryRefinementEnabled(true);
         recyclerView = findViewById(R.id.recyclerView);
+        greenAdapter = new GreenAdapterHome(new ArrayList<String>(), this);
+        recyclerView.setAdapter(greenAdapter);
+        recyclerView.setHasFixedSize(true);
+        DividerItemDecoration itemDecor = new DividerItemDecoration(this, 1);
+        recyclerView.addItemDecoration(itemDecor);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
         mySwipeRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipeRefresh);
+        sharedPref=Home.this.getPreferences(Context.MODE_PRIVATE);
+
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
@@ -120,8 +131,12 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String s) {
 
-        if (TextUtils.isEmpty(s))
-            Toast.makeText(Home.this,"Network Error",Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(s)) {
+            Toast.makeText(Home.this, "Network Error", Toast.LENGTH_SHORT).show();
+            s=getRandomWordsPreference();
+            if(s!=null)
+                greenAdapter.setWords(JsonParser.dataMuseParser(s));
+        }
         else {
 
             ArrayList<String>data=JsonParser.dataMuseParser(s);
@@ -129,20 +144,20 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
                 Toast.makeText(Home.this,"Oops nothing to show",Toast.LENGTH_SHORT).show();
             }
             else {
-                if (greenAdapter==null) {
-                    greenAdapter = new GreenAdapterHome(data, this);
-                    recyclerView.setAdapter(greenAdapter);
-                    recyclerView.setHasFixedSize(true);
-                    DividerItemDecoration itemDecor = new DividerItemDecoration(this, 1);
-                    recyclerView.addItemDecoration(itemDecor);
-                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-                    recyclerView.setLayoutManager(layoutManager);
-                } else {
-                    greenAdapter.setWords(data);
-                }
+                greenAdapter.setWords(data);
+                applyPersistence(s);
             }
         }
         mySwipeRefreshLayout.setRefreshing(false);
+    }
+    private String getRandomWordsPreference(){
+        String randomWordsJson=sharedPref.getString(getString(R.string.golden_key),null);
+        return randomWordsJson;
+    }
+    private void applyPersistence(String randomWordsJson){
+        SharedPreferences.Editor editor=sharedPref.edit();
+        editor.putString(getString(R.string.golden_key),randomWordsJson);
+        editor.apply();
     }
 
     @Override
