@@ -14,6 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -72,14 +73,19 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
                    }
                 });
                 greenAdapter.deleteWord(obj);
-                deleteFile(obj);
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        deleteFile(obj);
+                    }
+                });
             }
         }).attachToRecyclerView(recyclerView);
     }
 
     private void deleteFile(WordsEntity obj) {
         String url=obj.getPronunciationUrl();
-        if(url!=null){
+        if(!TextUtils.isEmpty(url)){
             File fileToDelete=new File(getAudioFolderUrl(),getFileName(url));
             if(fileToDelete.exists())
                 fileToDelete.delete();
