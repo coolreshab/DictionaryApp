@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Dictionary</string>
+    <string name="app_name">Word Sprint</string>
     <string name="search_hint">Enter a word</string>
     <string name="golden_key">1000000007</string>
 </resources>

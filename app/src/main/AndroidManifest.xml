@@ -6,19 +6,19 @@
 
     <application
         android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/wordsprint"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         >
         <activity android:name=".SavedWords"
-            android:label="History"
+            android:label="Sprint History"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" >
         </activity>
         <activity android:name=".Details"
-            android:label="Details"
+            android:label="Sprint Details"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" >
             <intent-filter>

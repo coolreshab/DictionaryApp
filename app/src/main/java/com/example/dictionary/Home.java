@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -20,6 +21,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,11 +48,6 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) findViewById(R.id.search);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
-        searchView.setQueryRefinementEnabled(true);
         recyclerView = findViewById(R.id.recyclerView);
         greenAdapter = new GreenAdapterHome(new ArrayList<String>(), this);
         recyclerView.setAdapter(greenAdapter);
@@ -77,6 +75,14 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.saved_words, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
+        searchView.setQueryHint("Lets Sprint");
+        //searchView.setQueryRefinementEnabled(true);
         return true;
     }
 
@@ -172,7 +178,14 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
         intent.putExtra(Intent.EXTRA_TEXT,word);
         startActivity(intent);
     }
-
+    @Override
+    public void onBackPressed() {
+        if (!searchView.isIconified()) {
+            searchView.setIconified(true);
+        } else {
+            super.onBackPressed();
+        }
+    }
     public String randomizer(){
 
         String randomString="";

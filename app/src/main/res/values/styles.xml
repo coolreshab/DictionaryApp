@@ -7,6 +7,18 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionMenuTextAppearance">@style/MenuItemTextAppearance</item>
+
+        <item name="android:autoCompleteTextViewStyle">@style/myAutoCompleteTextViewStyle
+        </item>
+        <item name="android:textAppearanceSearchResultTitle">@style/mySearchResult</item>
+
+    </style>
+
+    <style name="myAutoCompleteTextViewStyle" parent="Widget.AppCompat.Light.AutoCompleteTextView">
+        <item name="android:popupBackground">#FFF</item>
+    </style>
+    <style name="mySearchResult" parent="TextAppearance.AppCompat.SearchResult.Title">
+        <item name="android:textColor">#000</item>
     </style>
 
     <style name="MenuItemTextAppearance" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Menu">
@@ -21,6 +33,7 @@
         <item name="android:layout_height">1dp</item> // You can change thickness here.
 
     </style>
-    >
+
+
 
 </resources>

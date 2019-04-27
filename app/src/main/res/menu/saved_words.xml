@@ -5,8 +5,15 @@
     <item
         android:id="@+id/savedWords"
         android:orderInCategory="1"
-        app:showAsAction="always"
-        android:title="History"
+        app:showAsAction="never"
+        android:title="Sprint History"
 
         />
+    <item
+        android:id="@+id/search"
+        android:orderInCategory="2"
+        android:title="Search"
+        app:showAsAction="always"
+        app:actionViewClass="android.widget.SearchView"/>
+
 </menu>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.media.Image;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 
@@ -38,7 +40,8 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
     private SearchView searchView;
     private SharedPreferences sharedPref;
     private final static String FOLDER_NAME="pronunciation";
-
+    private ImageView historyError;
+    private ImageView historyErrorFavourite;
 
 
     @Override
@@ -55,6 +58,8 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
         recyclerView.addItemDecoration(itemDecor);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+        historyError=(ImageView)findViewById(R.id.historyError);
+        historyErrorFavourite=(ImageView)findViewById(R.id.historyErrorFavourite);
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -73,6 +78,7 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
                    }
                 });
                 greenAdapter.deleteWord(obj);
+                toggle();
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -82,7 +88,46 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
             }
         }).attachToRecyclerView(recyclerView);
     }
+    private void toggle(){
+        if(greenAdapter.getItemCount()==0){
+            if(!getCheckedPreference()) {
+                toggleEmptyStateAll(true);
+            }
+            else{
+                toggleEmptyStateFavorite(true);
+            }
+        }
+        else{
+            toggleEmptyStateAll(false);
+        }
+    }
 
+    private void toggleEmptyStateFavorite(boolean flag) {
+
+        if(flag){
+            historyError.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.GONE);
+            historyErrorFavourite.setVisibility(View.VISIBLE);
+        }
+        else {
+            historyError.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            historyErrorFavourite.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void toggleEmptyStateAll(boolean flag){
+        if(flag){
+            historyError.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+            historyErrorFavourite.setVisibility(View.GONE);
+        }
+        else {
+            historyError.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            historyErrorFavourite.setVisibility(View.GONE);
+        }
+    }
     private void deleteFile(WordsEntity obj) {
         String url=obj.getPronunciationUrl();
         if(!TextUtils.isEmpty(url)){
@@ -97,6 +142,7 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
             @Override
             public void run() {
                 greenAdapter.setWords(savedData);
+                toggle();
             }
         });
     }
@@ -140,11 +186,23 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
             public boolean onQueryTextSubmit(String query) {
                 return false;
             }
-
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
                 greenAdapter.getFilter().filter(query);
+                return false;
+            }
+        });
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleEmptyStateAll(false);
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                toggle();
                 return false;
             }
         });

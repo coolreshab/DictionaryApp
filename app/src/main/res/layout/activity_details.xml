@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFF"
     xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView
+        android:layout_width="160dp"
+        android:id="@+id/wordNotFound"
+        android:layout_height="142dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/word_not_found"/>
+    <ImageView
+        android:layout_width="240dp"
+        android:id="@+id/networkError"
+        android:layout_height="332dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="55dp"
+        android:background="@drawable/network_error"/>
+
     <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

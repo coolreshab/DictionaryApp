@@ -20,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -56,6 +57,8 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
     private ProgressBar progressBar;
     private LinearLayout linearLayout;
     private GoogleFetchInfoFull results;
+    private ImageView wordNotFound;
+    private ImageView networkError;
     private WordsDb wordsDb;
     private final static long THRESHOLD = 10;
     private MediaPlayer mPlayer;
@@ -225,6 +228,8 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
         linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
         mPlayer=new MediaPlayer();
         circularProgress=(ProgressBar)findViewById(R.id.progressBarCircular);
+        wordNotFound=(ImageView)findViewById(R.id.wordNotFound);
+        networkError=(ImageView)findViewById(R.id.networkError);
     }
 
     public double getDiff(Date a, Date b) {
@@ -285,18 +290,26 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
         progressBar.setVisibility(View.INVISIBLE);
         linearLayout.setVisibility(View.VISIBLE);
         if (s.equals("2")) {
-            if (results == null)
-                wordName.setText("Network Error");
+            if (results == null) {
+                //wordName.setText("Network Error");
+                networkError.setVisibility(View.VISIBLE);
+                linearLayout.setVisibility(View.GONE);
+            }
             else {
                 //Toast.makeText(Details.this,"Network Error",Toast.LENGTH_SHORT).show();
                 displayDetails(results);
             }
-        } else if (s.equals("1"))
-            wordName.setText("Word not found");
+        } else if (s.equals("1")){
+            //wordName.setText("Word not found");
+            wordNotFound.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.GONE);
+        }
         else {
             results = JsonParser.googleDictionaryJsonParser(s);
             if (results == null || results.meaning.isEmpty()) {
-                wordName.setText("Word not found");
+                //wordName.setText("Word not found");
+                wordNotFound.setVisibility(View.VISIBLE);
+                linearLayout.setVisibility(View.GONE);
             } else {
                 displayDetails(results);
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
