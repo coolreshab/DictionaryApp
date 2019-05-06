@@ -1,5 +1,6 @@
 package com.example.dictionary;
 
+import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -31,18 +33,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWords.ButtonListener{
+public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWords.ButtonListener {
 
     private RecyclerView recyclerView;
     private GreenAdapterSavedWords greenAdapter;
-    private String TAG=SavedWords.class.getSimpleName();
+    private String TAG = SavedWords.class.getSimpleName();
     private WordsDb wordsDb;
     private SearchView searchView;
     private SharedPreferences sharedPref;
-    private final static String FOLDER_NAME="pronunciation";
+    private final static String FOLDER_NAME = "pronunciation";
     private ImageView historyError;
     private ImageView historyErrorFavourite;
-
+    private ImageView noResultsFound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +60,11 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
         recyclerView.addItemDecoration(itemDecor);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        historyError=(ImageView)findViewById(R.id.historyError);
-        historyErrorFavourite=(ImageView)findViewById(R.id.historyErrorFavourite);
+        historyError = (ImageView) findViewById(R.id.historyError);
+        historyErrorFavourite = (ImageView) findViewById(R.id.historyErrorFavourite);
+        noResultsFound = (ImageView) findViewById(R.id.noResultsFound);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -75,7 +80,7 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
                     @Override
                     public void run() {
                         wordsDb.wordsDao().deleteWords(obj);
-                   }
+                    }
                 });
                 greenAdapter.deleteWord(obj);
                 toggle();
@@ -88,56 +93,61 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
             }
         }).attachToRecyclerView(recyclerView);
     }
-    private void toggle(){
-        if(greenAdapter.getItemCount()==0){
-            if(!getCheckedPreference()) {
-                toggleEmptyStateAll(true);
+
+    private void toggle() {
+        if (greenAdapter.getItemCount() == 0) {
+            if (!getCheckedPreference()) {
+                showEmptyStateAll();
+            } else {
+                showEmptyStateFavorite();
             }
-            else{
-                toggleEmptyStateFavorite(true);
-            }
-        }
-        else{
-            toggleEmptyStateAll(false);
+        } else {
+            showRecyclerView();
         }
     }
 
-    private void toggleEmptyStateFavorite(boolean flag) {
+    private void showEmptyStateFavorite() {
 
-        if(flag){
-            historyError.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.GONE);
-            historyErrorFavourite.setVisibility(View.VISIBLE);
-        }
-        else {
-            historyError.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            historyErrorFavourite.setVisibility(View.VISIBLE);
-        }
+        historyError.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+        noResultsFound.setVisibility(View.GONE);
+        historyErrorFavourite.setVisibility(View.VISIBLE);
     }
 
-    private void toggleEmptyStateAll(boolean flag){
-        if(flag){
-            historyError.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.GONE);
-            historyErrorFavourite.setVisibility(View.GONE);
-        }
-        else {
-            historyError.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            historyErrorFavourite.setVisibility(View.GONE);
-        }
+    private void showEmptyStateAll() {
+
+        historyError.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        historyErrorFavourite.setVisibility(View.GONE);
+        noResultsFound.setVisibility(View.GONE);
+
     }
+
+    private void showRecyclerView() {
+        historyError.setVisibility(View.GONE);
+        noResultsFound.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+        historyErrorFavourite.setVisibility(View.GONE);
+    }
+
+    private void showEmptyStateNoResultsFound() {
+
+        historyError.setVisibility(View.GONE);
+        noResultsFound.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        historyErrorFavourite.setVisibility(View.GONE);
+    }
+
     private void deleteFile(WordsEntity obj) {
-        String url=obj.getPronunciationUrl();
-        if(!TextUtils.isEmpty(url)){
-            File fileToDelete=new File(getAudioFolderUrl(),getFileName(url));
-            if(fileToDelete.exists())
+        String url = obj.getPronunciationUrl();
+        if (!TextUtils.isEmpty(url)) {
+            File fileToDelete = new File(getAudioFolderUrl(), getFileName(url));
+            if (fileToDelete.exists())
                 fileToDelete.delete();
         }
     }
 
-    private void updateUI(final List<WordsEntity> savedData){
+    private void updateUI(final List<WordsEntity> savedData) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -146,12 +156,13 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
             }
         });
     }
+
     @Override
     public void onClickButton(int id) {
 
-        String word=greenAdapter.getItemWord(id);
-        Intent intent=new Intent(SavedWords.this,Details.class);
-        intent.putExtra(Intent.EXTRA_TEXT,word);
+        String word = greenAdapter.getItemWord(id);
+        Intent intent = new Intent(SavedWords.this, Details.class);
+        intent.putExtra(Intent.EXTRA_TEXT, word);
         startActivity(intent);
     }
 
@@ -161,7 +172,7 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                WordsEntity savedResult=wordsDb.wordsDao().loadWordByName(GoogleFetchInfoFull.convert(greenAdapter.getItemWord(id)));
+                WordsEntity savedResult = wordsDb.wordsDao().loadWordByName(GoogleFetchInfoFull.convert(greenAdapter.getItemWord(id)));
                 savedResult.setIsStarred(!savedResult.getIsStarred());
                 wordsDb.wordsDao().updateWords(savedResult);
             }
@@ -186,17 +197,31 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
             public boolean onQueryTextSubmit(String query) {
                 return false;
             }
+
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
-                greenAdapter.getFilter().filter(query);
+                //Log.d(TAG, "query text changed");
+                greenAdapter.getFilter().filter(query, new Filter.FilterListener() {
+                    @Override
+                    public void onFilterComplete(int count) {
+                        if (greenAdapter.getItemCount() == 0) {
+                            //Log.d(TAG, "triggered");
+                            showEmptyStateNoResultsFound();
+                        }
+                        else{
+                            showRecyclerView();
+                        }
+                    }
+                });
+
                 return false;
             }
         });
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toggleEmptyStateAll(false);
+                toggle();
             }
         });
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
@@ -207,20 +232,19 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
             }
         });
 
-        sharedPref=SavedWords.this.getPreferences(Context.MODE_PRIVATE);
-        boolean checked=getCheckedPreference();
-        if(checked) {
+        sharedPref = SavedWords.this.getPreferences(Context.MODE_PRIVATE);
+        boolean checked = getCheckedPreference();
+        if (checked) {
             showStarred();
-        }
-        else {
+        } else {
             showAll();
         }
         menu.findItem(R.id.favourite_history).setChecked(checked);
         return true;
     }
 
-    private boolean getCheckedPreference(){
-        boolean checked=sharedPref.getBoolean(getString(R.string.golden_key),false);
+    private boolean getCheckedPreference() {
+        boolean checked = sharedPref.getBoolean(getString(R.string.golden_key), false);
         return checked;
     }
 
@@ -234,49 +258,55 @@ public class SavedWords extends AppCompatActivity implements GreenAdapterSavedWo
         //noinspection SimplifiableIfStatement
         if (id == R.id.search_history) {
             return true;
-        }
-        else if(id==R.id.favourite_history){
-            if(!item.isChecked()){
+        } else if (id == R.id.favourite_history) {
+            if (!item.isChecked()) {
                 item.setChecked(true);
                 showStarred();
                 applyPersistence(true);
-            }
-            else{
+            } else {
                 item.setChecked(false);
                 showAll();
                 applyPersistence(false);
             }
         }
+        else if(id==android.R.id.home){
+            onBackPressed();
+        }
         return super.onOptionsItemSelected(item);
     }
-    private void applyPersistence(boolean flag){
-        SharedPreferences.Editor editor=sharedPref.edit();
-        editor.putBoolean(getString(R.string.golden_key),flag);
+
+    private void applyPersistence(boolean flag) {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(getString(R.string.golden_key), flag);
         editor.apply();
     }
-    private void showStarred(){
+
+    private void showStarred() {
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                List<WordsEntity>savedData=wordsDb.wordsDao().loadAllStarredWords(true);
+                List<WordsEntity> savedData = wordsDb.wordsDao().loadAllStarredWords(true);
                 updateUI(savedData);
             }
         });
     }
-    private void showAll(){
+
+    private void showAll() {
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                List<WordsEntity>savedData=wordsDb.wordsDao().loadAllWords();
+                List<WordsEntity> savedData = wordsDb.wordsDao().loadAllWords();
                 updateUI(savedData);
             }
         });
     }
-    public String getFileName(String link){
-        String FILE_NAME= Uri.parse(link).getLastPathSegment();
+
+    public String getFileName(String link) {
+        String FILE_NAME = Uri.parse(link).getLastPathSegment();
         return FILE_NAME;
     }
-    public String getAudioFolderUrl(){
+
+    public String getAudioFolderUrl() {
 
         Context context = getApplicationContext();
         String folder = context.getFilesDir().getAbsolutePath() + File.separator + FOLDER_NAME;

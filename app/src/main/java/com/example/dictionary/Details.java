@@ -1,5 +1,6 @@
 package com.example.dictionary;
 
+import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -150,6 +152,15 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
             }
         });
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()==android.R.id.home){
+            onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void startDownload(String link){
 
         int count;
@@ -230,6 +241,8 @@ public class Details extends AppCompatActivity implements LoaderManager.LoaderCa
         circularProgress=(ProgressBar)findViewById(R.id.progressBarCircular);
         wordNotFound=(ImageView)findViewById(R.id.wordNotFound);
         networkError=(ImageView)findViewById(R.id.networkError);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
 
     public double getDiff(Date a, Date b) {

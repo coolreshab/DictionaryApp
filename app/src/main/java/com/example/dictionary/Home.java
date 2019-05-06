@@ -1,5 +1,6 @@
 package com.example.dictionary;
 
+import android.app.ActionBar;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -40,7 +41,6 @@ public class Home extends AppCompatActivity implements LoaderManager.LoaderCallb
     private RecyclerView recyclerView;
     private GreenAdapterHome greenAdapter;
     private SwipeRefreshLayout mySwipeRefreshLayout;
-
     String TAG=Home.class.getSimpleName();
     private SharedPreferences sharedPref;
 

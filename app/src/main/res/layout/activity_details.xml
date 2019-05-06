@@ -10,6 +10,7 @@
         android:layout_gravity="center"
         android:visibility="gone"
         android:layout_marginBottom="60dp"
+        android:scaleType="fitCenter"
         android:background="@drawable/word_not_found"/>
     <ImageView
         android:layout_width="240dp"
@@ -17,6 +18,7 @@
         android:layout_height="332dp"
         android:layout_gravity="center"
         android:visibility="gone"
+        android:scaleType="fitCenter"
         android:layout_marginBottom="55dp"
         android:background="@drawable/network_error"/>
 
