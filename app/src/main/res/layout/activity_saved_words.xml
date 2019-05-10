@@ -32,7 +32,6 @@
         android:layout_gravity="center"
         android:visibility="gone"
         android:layout_marginBottom="40dp"
-        android:scaleType="fitCenter"
         android:background="@drawable/history_error_favourite1"/>
     <ImageView
         android:layout_width="200dp"
